@@ -31,9 +31,11 @@
 #include "skinbank.h"
 #include "stylehelper.h"
 
+#include <QAction>
 #include <QHBoxLayout>
 #include <QGroupBox>
 #include <QAbstractButton>
+#include <QButtonGroup>
 #include <QCheckBox>
 #include <QSpinBox>
 #include <QCommandLinkButton>
