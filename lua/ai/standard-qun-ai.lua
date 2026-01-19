@@ -1016,6 +1016,10 @@ function sgs.ai_slash_prohibit.leiji(self, from, to, card)
 	if self:hasEightDiagramEffect(to) then return true end
 end
 
+function sgs.ai_cardneed.leiji(to, card)
+	return card:isKindOf("Jink") and (getKnownCard(to, Global_room:getCurrent(), "Jink", true) == 0 and to:getCardCount(true) <= 3)
+end
+
 sgs.guidao_suit_value = {
 	spade = 3.9,
 	club = 2.7
