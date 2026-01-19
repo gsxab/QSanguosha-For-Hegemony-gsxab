@@ -1017,7 +1017,7 @@ function sgs.ai_slash_prohibit.leiji(self, from, to, card)
 end
 
 function sgs.ai_cardneed.leiji(to, card)
-	return card:isKindOf("Jink") and (getKnownCard(to, Global_room:getCurrent(), "Jink", true) == 0 and to:getCardCount(true) <= 3)
+	return card:isKindOf("Jink") and (sgs.card_lack[to:objectName()]["Jink"] == 1 or (getKnownCard(to, Global_room:getCurrent(), "Jink", true) == 0 and to:getCardCount(true) <= 3))
 end
 
 sgs.guidao_suit_value = {
