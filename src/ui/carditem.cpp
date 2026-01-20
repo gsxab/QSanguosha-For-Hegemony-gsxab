@@ -366,17 +366,17 @@ void CardItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
     if (frozen) return;
 
+    if (auto_back) {
+        goBack(true, false);
+    }
+
+    update(); // update first in case "this" may have become corrupted since event emitted
+
     QPointF totalMove = mapToParent(mouseEvent->pos()) - _m_lastMousePressScenePos;
     if (totalMove.x() * totalMove.x() + totalMove.y() * totalMove.y() < _S_MOVE_JITTER_TOLERANCE)
         emit clicked();
     else
         emit released();
-
-    if (auto_back) {
-        goBack(true, false);
-    }
-
-    update();
 }
 
 void CardItem::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent)
