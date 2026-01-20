@@ -562,7 +562,7 @@ sgs.ai_skill_use_func.XuanhuoAttachCard= function(card, use, self)
   sgs.ai_use_priority.XuanhuoAttachCard = 5
   --self.room:writeToConsole("发动眩惑:"..self.player:objectName())
   --sgs.debugFunc(self.player, 2)
-  self.player:speak("发动眩惑")
+  --self.player:speak("发动眩惑")
   if self.player:hasSkill("jizhi") then--使用锦囊后
     sgs.ai_use_priority.XuanhuoAttachCard = 2.8
   end
