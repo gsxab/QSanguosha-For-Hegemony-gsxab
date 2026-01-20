@@ -273,6 +273,11 @@ public:
     virtual void setMark(const char *mark, int value);
     int getMark(const char *mark) const;
 
+    void addStringMark(const char *mark, const char *value);
+    bool removeStringMark(const char *mark, const char *value);
+    virtual void setStringMark(const char* mark, QStringList value);
+    QStringList getStringMark(const char* mark) const;
+
     void setChained(bool chained);
     bool isChained() const;
     bool canBeChainedBy(const Player *source = NULL) const;

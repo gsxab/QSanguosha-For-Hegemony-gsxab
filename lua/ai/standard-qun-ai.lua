@@ -472,7 +472,11 @@ luanji_skill.getTurnUseCard = function(self)
 	local archery = sgs.cloneCard("archery_attack")
 	local first_found, second_found = false, false
 	local first_card, second_card
-	local usedsuits = self.player:property("luanjiUsedSuits"):toString():split("+")
+
+	local usedsuits = self.player:getStringMark("@luanji-phase")
+	if luanjiSuits then
+		Global_room:writeToConsole("luanji=" .. table.concat(usedsuits, ","))
+	end
 
 	if self.player:getHandcardNum() + self.player:getHandPile():length() >= 2 then
 		local cards = self.player:getHandcards()
@@ -527,7 +531,7 @@ luanji_skill.getTurnUseCard = function(self)
 		self:getSuitNum("spade", false, self.player) > 1 + spadeKeepnum or
 		self:getSuitNum("club", false, self.player) > 1 + clubKeepnum then
 		   hasSamesuit = true
-	   end
+		end
 
 		for _, fcard in ipairs(cards) do
 			local fvalueCard = (isCard("Peach", fcard, self.player) or isCard("ExNihilo", fcard, self.player)
@@ -609,9 +613,17 @@ local shuangxiong_skill = {}
 shuangxiong_skill.name = "shuangxiong"
 table.insert(sgs.ai_skills, shuangxiong_skill)
 shuangxiong_skill.getTurnUseCard = function(self)
-	if self.player:getMark("##shuangxiong+no_suit_black") + self.player:getMark("##shuangxiong+no_suit_red") == 0 then return nil end
-	local black_mark = self.player:getMark("##shuangxiong+no_suit_black")
-	local red_mark = self.player:getMark("##shuangxiong+no_suit_red")
+	local shuangxiong_mark = self.player:getStringMark("@shuangxiong-turn")
+	Global_room:writeToConsole("shuangxiong=" .. table.concat(shuangxiong_mark, ","))
+	local black_mark = false
+	local red_mark = false
+	for _, mark in ipairs(shuangxiong_mark) do
+		if mark == "no_suit_black" then
+			black_mark = true
+		elseif mark == "no_suit_red" then
+			red_mark = true
+		end
+	end
 
 	local cards = self.player:getCards("h")
 	for _, id in sgs.qlist(self.player:getHandPile()) do
@@ -622,7 +634,7 @@ shuangxiong_skill.getTurnUseCard = function(self)
 
 	local card
 	for _, acard in ipairs(cards) do
-		if (acard:isRed() and red_mark > 0) or (acard:isBlack() and black_mark > 0) then
+		if (acard:isRed() and red_mark) or (acard:isBlack() and black_mark) then
 			card = acard
 			break
 		end
