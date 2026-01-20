@@ -615,13 +615,13 @@ table.insert(sgs.ai_skills, shuangxiong_skill)
 shuangxiong_skill.getTurnUseCard = function(self)
 	local shuangxiong_mark = self.player:getStringMark("@shuangxiong-turn")
 	Global_room:writeToConsole("shuangxiong=" .. table.concat(shuangxiong_mark, ","))
-	local black_mark = false
-	local red_mark = false
+	local no_black_mark = false
+	local no_red_mark = false
 	for _, mark in ipairs(shuangxiong_mark) do
 		if mark == "no_suit_black" then
-			black_mark = true
+			no_black_mark = true
 		elseif mark == "no_suit_red" then
-			red_mark = true
+			no_red_mark = true
 		end
 	end
 
@@ -634,7 +634,7 @@ shuangxiong_skill.getTurnUseCard = function(self)
 
 	local card
 	for _, acard in ipairs(cards) do
-		if (acard:isRed() and red_mark) or (acard:isBlack() and black_mark) then
+		if (acard:isRed() and no_black_mark) or (acard:isBlack() and no_red_mark) then
 			card = acard
 			break
 		end
