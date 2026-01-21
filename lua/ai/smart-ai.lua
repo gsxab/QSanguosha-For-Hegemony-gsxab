@@ -165,7 +165,7 @@ function SetInitialTables()
 	sgs.masochism_skill = "yiji|fankui|jieming|ganglie|fangzhu|hengjiang|jianxiong|qianhuan|zhiyu|jihun|fudi|" ..
 						  "bushi|shicai|quanji|zhaoxin|fankui_simazhao|wanggui|sidi"
 	sgs.defense_skill = "qingguo|longdan|kongcheng|niepan|bazhen|kanpo|xiangle|tianxiang|liuli|qianxun|leiji|duanchang|beige|weimu|" ..
-						"tuntian|shoucheng|yicheng|qianhuan|jizhao|wanwei|enyuan|buyi|keshou|qiuan|biluan|jiancai|aocai|" ..
+						"tuntian|shoucheng|yicheng|qianhuan|jizhao|wanwei|enyuan|buyi|keshou|qiuan|biluan|aocai|" ..
 						"xibing|zhente|qiao|shejian|yusui|deshao|yuanyu|mingzhe|jilei|shigong"
 	sgs.usefull_skill = "tiandu|qiaobian|xingshang|xiaoguo|wusheng|guanxing|qicai|jizhi|kuanggu|lianhuan|huoshou|juxiang|shushen|zhiheng|keji|" ..
 						"duoshi|xiaoji|hongyan|haoshi|guzheng|zhijian|shuangxiong|guidao|guicai|xiongyi|mashu|lirang|yizhi|shengxi|" ..
@@ -2496,7 +2496,11 @@ function SmartAI:filterEvent(event, player, data)
 
 	if self ~= sgs.recorder then return end
 
-	if event == sgs.GeneralShown then
+	if event == sgs.Death then
+		local struct = data:toDeath()
+		local from = struct.who
+		speakTrigger(nil, from, nil, "death")
+	elseif event == sgs.GeneralShown then
 		self:updatePlayerKingdom(player, data)
 	elseif event == sgs.GeneralHidden then
 		if player:getAI() then player:setSkillsPreshowed("hd", true) end

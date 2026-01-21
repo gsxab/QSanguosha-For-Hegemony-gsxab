@@ -25,7 +25,7 @@ function speak(to, type)
 	if to:getState() ~= "robot" then return end
 	if sgs.GetConfig("OriginAIDelay", 0) == 0 then return end
 
-	if table.contains(sgs.ai_chat, type) then
+	if sgs.ai_chat[type] then -- 不能用 table:contains ，会比较类型，但 sgs.ai_chat 中同时有 table 和 function ，导致直接 false
 		local i = math.random(1, #sgs.ai_chat[type])
 		to:speak(sgs.ai_chat[type][i])
 	end
