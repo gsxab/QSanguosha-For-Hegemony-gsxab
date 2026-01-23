@@ -474,9 +474,7 @@ luanji_skill.getTurnUseCard = function(self)
 	local first_card, second_card
 
 	local usedsuits = self.player:getStringMark("@luanji-phase")
-	if luanjiSuits then
-		Global_room:writeToConsole("luanji=" .. table.concat(usedsuits, ","))
-	end
+	--Global_room:writeToConsole("luanji=" .. table.concat(usedsuits, ","))
 
 	if self.player:getHandcardNum() + self.player:getHandPile():length() >= 2 then
 		local cards = self.player:getHandcards()
@@ -540,14 +538,14 @@ luanji_skill.getTurnUseCard = function(self)
 			if useAll then
 				fvalueCard = isCard("ArcheryAttack", fcard, self.player) or isCard("BefriendAttacking", fcard, self.player)
 			end
-			if not fvalueCard and not table.contains(usedsuits, sgs.Sanguosha:getCard(fcard:getId()):getSuitString()) then
+			if not fvalueCard and not table.contains(usedsuits, sgs.Sanguosha:getCard(fcard:getId()):getSuitString().."_char") then
 				first_card = fcard
 				first_found = true
 				for _, scard in ipairs(cards) do
 					local svalueCard = (isCard("Peach", scard, self.player) or isCard("ExNihilo", scard, self.player) or isCard("ArcheryAttack", scard, self.player) or isCard("JadeSeal", scard, self.player))
 					if useAll then svalueCard = (isCard("ArcheryAttack", scard, self.player)) end
 					if first_card ~= scard and (scard:getSuit() == first_card:getSuit() or not hasSamesuit)--新万箭齐发
-						and not svalueCard and not table.contains(usedsuits, sgs.Sanguosha:getCard(scard:getId()):getSuitString()) then
+						and not svalueCard and not table.contains(usedsuits, sgs.Sanguosha:getCard(scard:getId()):getSuitString().."_char") then
 
 						local card_str = ("archery_attack:luanji[%s:%s]=%d+%d&luanji"):format("to_be_decided", 0, first_card:getId(), scard:getId())
 						local archeryattack = sgs.Card_Parse(card_str)
@@ -614,7 +612,7 @@ shuangxiong_skill.name = "shuangxiong"
 table.insert(sgs.ai_skills, shuangxiong_skill)
 shuangxiong_skill.getTurnUseCard = function(self)
 	local shuangxiong_mark = self.player:getStringMark("@shuangxiong-turn")
-	Global_room:writeToConsole("shuangxiong=" .. table.concat(shuangxiong_mark, ","))
+	--Global_room:writeToConsole("shuangxiong=" .. table.concat(shuangxiong_mark, ","))
 	local no_black_mark = false
 	local no_red_mark = false
 	for _, mark in ipairs(shuangxiong_mark) do

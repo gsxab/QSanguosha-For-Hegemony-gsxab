@@ -423,7 +423,6 @@ public:
 
                 }
                 room->setPlayerStringMark(player, "@luanji-phase", luanji_suits);
-                room->setPlayerProperty(player, "luanjiUsedSuits", luanji_suits);
             }
         }
     }
