@@ -1483,7 +1483,7 @@ function SmartAI:writeKeepValue(card)
 		elseif card:isKindOf("LuminousPearl") then value = (self.player:getPhase() == sgs.Player_Play and not self.player:hasUsed("ZhihengCard")) and 3.39 or 3.2
 		elseif card:isKindOf("WoodenOx") then
 			value = 3.19
-			for _, id in sgs.qlist(self.player:getHandPile()) do
+			for _, id in sgs.qlist(self.player:getPile("wooden_ox")) do
 				local c = sgs.Sanguosha:getCard(id)
 				value = value + (sgs.ai_keep_value[c:getClassName()] or 0)
 			end
