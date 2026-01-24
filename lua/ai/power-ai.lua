@@ -267,7 +267,7 @@ table.insert(sgs.ai_skills, jianglve_skill)
 jianglve_skill.getTurnUseCard = function(self, inclusive)
 	if self.player:getMark("@strategy") < 1 then return end
 
-	-- 由于现版本没有势力召唤，不能无脑发动将略，暂定收益足够小或还有大量未明确势力角色时不发动
+	-- 由于现版本没有势力召唤，不能无脑发动将略，暂定收益足够小且还有大量未明确势力角色时不发动
 	local friend_count = 0
 	local unknown_count = 0
 	for _, p in sgs.qlist(self.room:getAlivePlayers()) do
@@ -277,7 +277,7 @@ jianglve_skill.getTurnUseCard = function(self, inclusive)
 			friend_count = friend_count + 1
 		end
 	end
-	if friend_count <= 2 and unknown_count > friend_count * 2 then
+	if friend_count * 3 <= #self.room:getAlivePlayers() and unknown_count > friend_count * 2 then
 		return
 	end
 
