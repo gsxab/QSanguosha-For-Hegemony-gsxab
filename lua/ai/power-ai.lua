@@ -1270,7 +1270,7 @@ sgs.ai_skill_cardask["@keshou"] = function(self, data, pattern, target, target2)
     if isCard("Peach", card, self.player) or (card:isKindOf("Analeptic") and self.player:getHp() == 1) then
     elseif card:isRed() then
       table.insert(red_cards, card)
-    elseif card::isBlack() then
+    elseif card:isBlack() then
       table.insert(black_cards, card)
     end
   end
