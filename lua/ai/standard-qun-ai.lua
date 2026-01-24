@@ -494,6 +494,7 @@ luanji_skill.getTurnUseCard = function(self)
 			end
 		end
 
+		-- 计数保留牌以外的花色分布，用于选牌
 		for _, c in ipairs(cards) do
 			if useAll then
 				if isCard("ArcheryAttack", c, self.player) or isCard("BefriendAttacking", c, self.player) then
@@ -523,11 +524,11 @@ luanji_skill.getTurnUseCard = function(self)
 				end
 			end
 		end
-		--去除保留牌的花色，优先使用同色
-		if self:getSuitNum("heart", false, self.player) > 1 + heartKeepnum or
-		self:getSuitNum("diamond", false, self.player) > 1 + diamondKeepnum or
-		self:getSuitNum("spade", false, self.player) > 1 + spadeKeepnum or
-		self:getSuitNum("club", false, self.player) > 1 + clubKeepnum then
+		--去除保留牌的花色，判断是否有同色。如果有可用同色则优先使用同色。但是如果已经用过这种颜色则不打标记，以免下面直接找不到同色对子
+		if (not table.contains(usedsuits, "heart_char") and self:getSuitNum("heart", false, self.player) > 1 + heartKeepnum) or
+			(not table.contains(usedsuits, "diamond_char") and self:getSuitNum("diamond", false, self.player) > 1 + diamondKeepnum) or
+			(not table.contains(usedsuits, "spade_char") and self:getSuitNum("spade", false, self.player) > 1 + spadeKeepnum) or
+			(not table.contains(usedsuits, "club_char") and self:getSuitNum("club", false, self.player) > 1 + clubKeepnum) then
 		   hasSamesuit = true
 		end
 
@@ -542,22 +543,26 @@ luanji_skill.getTurnUseCard = function(self)
 				first_card = fcard
 				first_found = true
 				for _, scard in ipairs(cards) do
-					local svalueCard = (isCard("Peach", scard, self.player) or isCard("ExNihilo", scard, self.player) or isCard("ArcheryAttack", scard, self.player) or isCard("JadeSeal", scard, self.player))
-					if useAll then svalueCard = (isCard("ArcheryAttack", scard, self.player)) end
-					if first_card ~= scard and (scard:getSuit() == first_card:getSuit() or not hasSamesuit)--新万箭齐发
-						and not svalueCard and not table.contains(usedsuits, sgs.Sanguosha:getCard(scard:getId()):getSuitString().."_char") then
+					if first_card ~= scard and (scard:getSuit() == first_card:getSuit() or not hasSamesuit) then
+						local svalueCard = (isCard("Peach", scard, self.player) or isCard("ExNihilo", scard, self.player)
+											or isCard("BefriendAttacking", scard, self.player) or isCard("AllianceFeast", scard, self.player)
+					 						or isCard("ArcheryAttack", scard, self.player) or isCard("JadeSeal", scard, self.player))
+						if useAll then
+							svalueCard = isCard("ArcheryAttack", scard, self.player) or isCard("BefriendAttacking", fcard, self.player)
+						end
+						if not svalueCard and not table.contains(usedsuits, sgs.Sanguosha:getCard(scard:getId()):getSuitString().."_char") then
+							local card_str = ("archery_attack:luanji[%s:%s]=%d+%d&luanji"):format("to_be_decided", 0, first_card:getId(), scard:getId())
+							local archeryattack = sgs.Card_Parse(card_str)
 
-						local card_str = ("archery_attack:luanji[%s:%s]=%d+%d&luanji"):format("to_be_decided", 0, first_card:getId(), scard:getId())
-						local archeryattack = sgs.Card_Parse(card_str)
+							assert(archeryattack)
 
-						assert(archeryattack)
-
-						local dummy_use = { isDummy = true }
-						self:useTrickCard(archeryattack, dummy_use)
-						if dummy_use.card then
-							second_card = scard
-							second_found = true
-							break
+							local dummy_use = { isDummy = true }
+							self:useTrickCard(archeryattack, dummy_use)
+							if dummy_use.card then
+								second_card = scard
+								second_found = true
+								break
+							end
 						end
 					end
 				end
