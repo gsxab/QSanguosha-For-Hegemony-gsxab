@@ -266,7 +266,22 @@ jianglve_skill.name = "jianglve"
 table.insert(sgs.ai_skills, jianglve_skill)
 jianglve_skill.getTurnUseCard = function(self, inclusive)
 	if self.player:getMark("@strategy") < 1 then return end
-  return sgs.Card_Parse("@JianglveCard=.&jianglve")
+
+	-- 由于现版本没有势力召唤，不能无脑发动将略，暂定收益足够小或还有大量未明确势力角色时不发动
+	local friend_count = 0
+	local unknown_count = 0
+	for _, p in sgs.qlist(self.room:getAlivePlayers()) do
+		if sgs.isAnjiang(p) then
+			unknown_count = unknown_count + 1
+		elseif self:isFriendWith(p) then
+			friend_count = friend_count + 1
+		end
+	end
+	if friend_count <= 2 and unknown_count > friend_count * 2 then
+		return
+	end
+
+	return sgs.Card_Parse("@JianglveCard=.&jianglve")
 end
 
 sgs.ai_skill_use_func.JianglveCard= function(card, use, self)
