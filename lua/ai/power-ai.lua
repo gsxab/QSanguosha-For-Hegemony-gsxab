@@ -277,11 +277,12 @@ jianglve_skill.getTurnUseCard = function(self, inclusive)
 			friend_count = friend_count + 1
 		end
 	end
-	if friend_count * 3 <= #self.room:getAlivePlayers() and unknown_count > friend_count * 2 then
-		return
+	if friend_count * 3 > #self.room:getAlivePlayers() or unknown_count <= friend_count * 2 then
+		return sgs.Card_Parse("@JianglveCard=.&jianglve")
 	end
-
-	return sgs.Card_Parse("@JianglveCard=.&jianglve")
+	if string.find(sgs.gameProcess(), "shu>>>") then
+		return sgs.Card_Parse("@JianglveCard=.&jianglve")
+	end
 end
 
 sgs.ai_skill_use_func.JianglveCard= function(card, use, self)
