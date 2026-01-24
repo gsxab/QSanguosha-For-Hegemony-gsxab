@@ -335,10 +335,13 @@ sgs.ai_chat_func[sgs.CardFinished].duoshi = function(self, player, data)
 		}
 		for _, p in ipairs(sgs.robot) do
 			if p:objectName() ~= use.from:objectName() and math.random() < 0.8 then
-				if p:hasSkill("xiaoji") then
-					p:speak("继续继续")
+				if p:hasShownSkills(sgs.lose_equip_skill) then
+					if p:hasEquip() then
+						p:speak("继续继续")
+					end
+				else
+					p:speak(chat[math.random(1, #chat)])
 				end
-				p:speak(chat[math.random(1, #chat)])
 				return
 			end
 		end
@@ -357,7 +360,7 @@ sgs.ai_chat_func[sgs.GeneralShown].show = function(self, player, data)
 	local chat1 = {
 		"亮一个",
 		"没想到吧"
-		}
+	}
 	local notshown, shown= 0, 0
 	for _,p in sgs.qlist(self.room:getAlivePlayers()) do
 		if  not p:hasShownOneGeneral() then
@@ -385,17 +388,19 @@ sgs.ai_chat_func[sgs.GeneralShown].show = function(self, player, data)
 		table.insert(chat,"终于亮了")
 		table.insert(chat,"竟然憋到现在")
 	end
-	if self.player:getRole() == "careerist" then
+	if self.player:getRole() == "careerist" and not (self.player:hasShownAllGenerals() and self.player:getActualGeneral1():getKingdom() == "careerist") then
 		table.insert(chat,"野了")
 		table.insert(chat,"喜闻乐见野心家")
 		table.insert(chat1,"竟然野了")
 	end
 	if not self.player:hasShownAllGenerals() then
 		table.insert(chat,self.player:screenName() .."原来是"..kingdom)
-		table.insert(chat,"看来这是大"..kingdom.."的节奏")
+		if self.player:getRole() ~= "careerist" then
+			table.insert(chat,"看来这是大"..kingdom.."的节奏")
+		end
 	elseif self.player:hasShownAllGenerals() then
 		table.insert(chat, "我就说".. self.player:screenName() .."是"..name1..name2.."吧")
-		table.insert(chat,"卧槽,"..name1..name2.."!")
+		table.insert(chat,"卧槽，"..name1..name2.."！")
 	end
 	for _, p in ipairs(sgs.robot) do
 		if p:objectName() ~= self.player:objectName() and (math.random() < 0.06 or (self.player:getRole() == "careerist" and math.random() < 0.5)) then
