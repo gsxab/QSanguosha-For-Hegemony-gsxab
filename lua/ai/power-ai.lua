@@ -1232,25 +1232,24 @@ sgs.ai_skill_playerchosen["command_buyi"] = sgs.ai_skill_playerchosen.damage
 sgs.ai_skill_invoke.keshou = function(self, data)
   local no_friend = true
   for _, p in sgs.qlist(self.room:getOtherPlayers(self.player)) do
-		if self.player:isFriendWith(p) then
+    if self.player:isFriendWith(p) then
       no_friend = false
       break
     end
-	end
-  if self.player:getHp() < 3 or self.player:getHandcardNum() > 3 or no_friend or self.player:getMark("GlobalBattleRoyalMode") > 0 then
+  end
+  if self.player:getHp() < 3 or self.player:getCards("he"):length() > 3 or no_friend or self.player:getMark("GlobalBattleRoyalMode") > 0 then
     return true
   end
   return false
 end
 
 sgs.ai_skill_cardask["@keshou"] = function(self, data, pattern, target, target2)
-	if self.player:getHandcardNum() < 2 then--缺手牌
+  if self.player:getCards("he"):length() < 2 then--缺手牌
     return "."
   end
 
-  if self.player:hasSkill("tianxiang")
-  and not (self.player:hasFlag("tianxiang1used") and self.player:hasFlag("tianxiang2used")) then--配合小乔
-    for _,card in sgs.qlist(self.player:getHandcards()) do
+  if self.player:hasSkill("tianxiang") and not (self.player:hasFlag("tianxiang1used") and self.player:hasFlag("tianxiang2used")) then -- 配合小乔
+    for _, card in sgs.qlist(self.player:getHandcards()) do
       if card:getSuit() == sgs.Card_Heart or (self.player:hasSkill("hongyan") and card:getSuit() == sgs.Card_Spade) then
         return "."
       end
@@ -1261,41 +1260,40 @@ sgs.ai_skill_cardask["@keshou"] = function(self, data, pattern, target, target2)
   if not self:damageIsEffective_(damage) then
     return "."
   end
-  if damage.damage > 1 and self.player:hasArmorEffect("SilverLion") then--无视防具？
+  if damage.damage > 1 and self.player:hasArmorEffect("SilverLion") then -- 考虑结算顺序恪守在狮子前，如果狮子会发动没必要先用技能
     return "."
   end
 
-  local function canKeshouDiscard(card)
+  local red_cards = {}
+  local black_cards = {}
+  for _, card in sgs.qlist(self.player:getCards("he")) do
     if isCard("Peach", card, self.player) or (card:isKindOf("Analeptic") and self.player:getHp() == 1) then
-      return false
+    elseif card:isRed() then
+      table.insert(red_cards, card)
+    elseif card::isBlack() then
+      table.insert(black_cards, card)
     end
-    return true
+  end
+  self:sortByKeepValue(red_cards)
+  self:sortByKeepValue(black_cards)
+
+  local red_selected = 100
+  local black_selected = 100
+  if #red_cards >= 2 then
+    red_selected = self:getKeepValue(red_cards[1]) + self:getKeepValue(red_cards[2])
+  elseif #black_cards > 2 then
+    black_selected = self:getKeepValue(black_cards[1]) + self.getKeepValue(black_cards[2])
   end
 
-  local cards = self.player:getHandcards() -- 获得所有手牌
-  cards=sgs.QList2Table(cards) -- 将列表转换为表
-  local keshou_cards = {}
-  if self.player:getHandcardNum() == 2  then--两张手牌的情况
-    if cards[1]:sameColorWith(cards[2]) and canKeshouDiscard(cards[1]) and canKeshouDiscard(cards[2]) then
-      table.insert(keshou_cards, cards[1]:getId())
-      table.insert(keshou_cards, cards[2]:getId())
-      return "$" .. table.concat(keshou_cards, "+")
-    end
-  else--三张及以上手牌
-    self:sortByKeepValue(cards) -- 按保留值排序
-    if cards[1]:sameColorWith(cards[2]) and canKeshouDiscard(cards[1]) and canKeshouDiscard(cards[2]) then
-      table.insert(keshou_cards, cards[1]:getId())
-      table.insert(keshou_cards, cards[2]:getId())
-      return "$" .. table.concat(keshou_cards, "+")
-    elseif cards[1]:sameColorWith(cards[3]) and canKeshouDiscard(cards[1])and canKeshouDiscard(cards[3]) then
-      table.insert(keshou_cards, cards[1]:getId())
-      table.insert(keshou_cards, cards[3]:getId())
-      return "$" .. table.concat(keshou_cards, "+")
-    elseif cards[2]:sameColorWith(cards[3]) and canKeshouDiscard(cards[2]) and canKeshouDiscard(cards[3]) then
-      table.insert(keshou_cards, cards[2]:getId())
-      table.insert(keshou_cards, cards[3]:getId())
-      return "$" .. table.concat(keshou_cards, "+")
-    end
+  local discard_thres = 6
+  if damage.damage > self.player:getHp() then
+    discard_thres = 8
+  end
+
+  if red_selected < black_selected and red_selected <= discard_thres then
+    return "$"..red_cards[1]:getId().."+"..red_cards[2]:getId()
+  elseif red_selected < black_selected and red_selected <= discard_thres then
+    return "$"..black_cards[1]:getId().."+"..black_cards[2]:getId()
   end
   return "."
 end
