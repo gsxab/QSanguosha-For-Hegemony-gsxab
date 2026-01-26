@@ -2476,7 +2476,7 @@ public:
         CardUseStruct use = data.value<CardUseStruct>();
         if ((use.card->getTypeId() == Card::TypeBasic || use.card->getTypeId() == Card::TypeTrick) && use.index == 0) {
             foreach (ServerPlayer *p, room->getAlivePlayers()) {
-                if (!use.to.contains(p) and (!p->isKongcheng() or (!p->isNude() && p->isFriendWith(player))))
+                if (!use.to.contains(p) && (!p->isKongcheng() || (!p->isNude() && p->isFriendWith(player))))
                     return QStringList(objectName());
             }
         }
@@ -2488,7 +2488,7 @@ public:
         CardUseStruct use = data.value<CardUseStruct>();
         QList<ServerPlayer *> to_choose;
         foreach (ServerPlayer *p, room->getAlivePlayers()) {
-            if (!use.to.contains(p) and (!p->isKongcheng() or (!p->isNude() && p->isFriendWith(player))))
+            if (!use.to.contains(p) && (!p->isKongcheng() || (!p->isNude() && p->isFriendWith(player))))
                 to_choose << p;
         }
         if (to_choose.isEmpty()) return false;

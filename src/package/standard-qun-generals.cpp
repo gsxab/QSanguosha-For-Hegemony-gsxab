@@ -495,7 +495,7 @@ public:
     {
         if (card->isEquipped()) return false;
         QStringList colors = Self->getStringMark("@shuangxiong-turn");
-        return (card->isRed() && colors.contains("no_suit_black")) or (card->isBlack() && colors.contains("no_suit_red"));
+        return (card->isRed() && colors.contains("no_suit_black")) || (card->isBlack() && colors.contains("no_suit_red"));
     }
 
     virtual const Card *viewAs(const Card *originalCard) const
