@@ -2042,14 +2042,9 @@ sgs.daming_keep_value = {
 }
 ]]
 
-
-
-
-
-
-
-
-
+sgs.ai_skill_choice.jinxian_hide = function(self, choices, data)
+	return self:selectActiveHide(self.player)
+end
 
 --苏飞
 sgs.ai_skill_playerchosen.lianpian = function(self, targets)

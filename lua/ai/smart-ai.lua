@@ -7002,6 +7002,134 @@ function SmartAI:getReward(player)
 	return x
 end
 
+function SmartAI:getHideValue(player, head) -- 主动隐藏主将或副将本身的收益
+	player = player or self.player
+	if player:isLord() and head then return 0 end -- 此时无操作意义，需要结合两个将时必须另做判断
+	if player:isDuanchang(head) then return 0 end
+
+	if player:cheakSkillLocation("guixiu", head)then return 2 end
+	if player:cheakSkillLocation("jinxian", head) then return 8 end
+	if (player:cheakSkillLocation("buqu", head)) and player:getPile("scars"):length() > 0 then
+		return player:getPile("scars"):length() * 2
+	end
+	if player:cheakSkillLocation("liangfan", head) then
+		if player:getHp() == 1 then -- 不要函了，算白省下一体力
+			for _, card in sgs.qlist(player:getPile("letter")) do -- 除非里面有桃和酒，可以先拿再掉血自救
+				if isCard("Peach", card, player) or isCard("Analeptic", card, player) then
+					return #player:getPile("letter") > 1 and -1 or 0 -- 如果不止这一张，负收益，否则 0 收益
+				end
+			end
+			return 2
+		end
+		local letterUseValue = 0
+		for _, card in sgs.qlist(player:getPile("letter")) do
+			if isCard("Peach", card, player) then
+				return #player:getPile("letter") > 1 and -1 or 0 -- 如果不止这一张，负收益，否则 0 收益
+			end
+			if card:isKindOf("AOE") then
+				return 0 -- AOE 花 1 体力拿不再记正负收益
+			end
+			letterUseValue = letterUseValue + self:getUseValue(card)
+		end
+		if letterUseValue > 10 then
+			return 0
+		end
+		return 1
+	end
+
+	-- 有副作用的锁定技，可以等使用再亮，暗置后比 0 收益略高
+	if player:cheakSkillLocation("suishi", head) then return 1 end
+	if player:cheakSkillLocation("fengshix", head) then return 1 end
+	if player:cheakSkillLocation("jilix", head) then return 1 end
+	if player:cheakSkillLocation("baolie", head) then return 1 end
+	if player:cheakSkillLocation("shicai", head) then return 1 end
+
+	-- 恣睢正常情况下暗置是负收益，但如果异超了，是保命的正收益
+	if player:cheakSkillLocation("zisui", head) then
+		if player:getPile("disloyalty") > player:getMaxHp() then
+			return 10
+		else
+			return player:getPile("disloyalty") * -4
+		end
+	end
+
+	-- 暗置后丢失标记的技能
+	if player:cheakSkillLocation("qianhuan", head) then
+		return player:getPile("sorcery"):length() * -3
+	end
+	if player:cheakSkillLocation("quanji", head) then
+		local power = player:getPile("power_pile"):length()
+		return power * power / -2
+	end
+	if player:cheakSkillLocation("jihun", head) then
+		return player:getGeneralPile("soul"):length() / -2
+	end
+	if player:cheakSkillLocation("shilu", head) then
+		return player:getGeneralPile("massacre"):length() * -2
+	end
+	if player:cheakSkillLocation("tuntian", head) then
+		if head then
+			return player:getPile("field"):length() * -2
+		else
+			return player:getPile("field"):length() * -4
+		end
+	end
+
+	-- 暗置后无法发动的光环技能
+	if player:cheakSkillLocation("tongdu", head) then return -4 end
+	if player:cheakSkillLocation("xuanhuo", head) then return -4 end
+	if player:cheakSkillLocation("diaodu", head) then return -2 end
+
+	-- 暗置后由于无法重新点亮暂时受损的技能
+	if player:cheakSkillLocation("bazhen", head) then return -2 end
+	if player:cheakSkillLocation("hongyan", head) then return -2 end
+	if player:cheakSkillLocation("aocai", head) then return -2 end
+	-- 和回合外相关的阵法，不好说实际效果，给更少些
+	if player:cheakSkillLocation("niaoxiang", head) then return -1 end
+	if player:cheakSkillLocation("fengshi", head) then return -1 end
+	if player:cheakSkillLocation("fengyang", head) then return -1 end
+
+	-- 优先暗置容易亮出的武将
+	local general = head and player.getGeneral() or not head and player:getGeneral2()
+	if sgs.findIntersectionSkills(general:getSkillList(true, head).join("|"), sgs.masochism_skill .. "|" .. sgs.defense_skill) then
+		return 0.1
+	end
+
+	-- 无所谓的，哪怕被暗置了也能在需要时发动
+	return 0
+end
+
+function SmartAI:needToActiveHide(player) -- 自己主动选择暗置一张（但不锁成暗置），最大额外收益
+	player = player or self.player
+	if player:isLord() then return self:getHideValue(player, false) end
+
+	local selectHeadValue = self:getHideValue(player, true)
+	local selectDeputyValue = self:getHideValue(player, false)
+
+	if selectHeadValue > selectDeputyValue then
+		return selectHeadValue
+	else
+		return selectDeputyValue
+	end
+end
+
+function SmartAI:selectActiveHide(player) -- 主动暗置自己一张武将牌，选择
+	player = player or self.player
+	if player:isLord() then return "deputy" end
+
+	local selectHeadValue = self:getHideValue(player, true)
+	local selectDeputyValue = self:getHideValue(player, false)
+	Global_room:writeToConsole("select active hide: " .. selectHeadValue .. " " ..selectDeputyValue)
+
+	if selectHeadValue > selectDeputyValue then
+		return "head"
+	elseif selectDeputyValue > selectHeadValue then
+		return "deputy"
+	else
+		return math.random(2) > 1 and "head" or "deputy"
+	end
+end
+
 function sgs.hasNullSkill(skill_name, player)
 	if sgs.general_shown[player:objectName()]["head"] and player:inHeadSkills(skill_name) and not player:hasSkill(skill_name) then
 	-- #player:disableShow(true) > 0 and not player:hasShownGeneral1()

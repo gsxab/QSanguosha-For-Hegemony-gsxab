@@ -316,7 +316,7 @@ sgs.ai_skill_choice["GameRule:TurnStart"] = function(self, choices, data)--旧�
 		if self:isWeak() and self:willShowForDefence() then
 			if canShowHead and showRate > 0.6 then
 				return "GameRule_AskForGeneralShowHead"
-			elseif canShowDeputy and showRate >0.6 then
+			elseif canShowDeputy and showRate > 0.6 then
 				return "GameRule_AskForGeneralShowDeputy"
 			end
 		end
@@ -511,19 +511,77 @@ sgs.ai_skill_choice.GameRule_AskForGeneralShow = function(self, choices)
 
 	if self.player:hasSkill("guixiu") and not self.player:hasShownSkill("guixiu") then
 		if self:isWeak() or (shown > 0 and eAtt > 0 and e - f < 3 and not self:willSkipPlayPhase()) then
-			if self.player:inHeadSkills("guixiu") and canShowHead then
-				return "show_head_general"
-			elseif canShowDeputy then
-				return "show_deputy_general"
+			if self.player:inHeadSkills("guixiu") then
+				if canShowHead then
+					return "show_head_general"
+				end
+			else
+				if canShowDeputy then
+					return "show_deputy_general"
+				end
 			end
 		end
 	end
 
 	if self.player:hasSkill("yongsi") and not self.player:hasShownSkill("yongsi") then--袁术玉玺
-		if self.player:inHeadSkills("yongsi") and canShowHead then
-			return "show_head_general"
-		elseif canShowDeputy then
-			return "show_deputy_general"
+		if self.player:inHeadSkills("yongsi") then
+			if canShowHead then
+				return "show_head_general"
+			end
+		else
+			if canShowDeputy then
+				return "show_deputy_general"
+			end
+		end
+	end
+
+	if self.player:hasSkill("jinxian") and not self.player:hasShownSkill("jinxian") then
+		local jinxianScore = 0
+		for _, p in sgs.qlist(self.room:getAlivePlayers()) do
+			if p:objectName() ~= self.player:objectName() and
+			 	(self.player:distanceTo(p) <= 1 or
+			 	(self.player:hasSkills("mashu_machao|mashu_madai|mashu_mateng|mashu_pengde") and
+			 	 not self.player:hasShownSkills("mashu_machao|mashu_madai|mashu_mateng|mashu_pengde") and
+				 self.player:distanceTo(p) <= 2)) then
+				local score = 0
+				-- 对一名目标武将的收益
+				if p:hasShownAllGenerals() then
+					if p:isLord() then
+						score = p:getHideValue(false)
+					else
+						local hideHead = p:getHideValue(true)
+						local hideDeputy = p:getHideValue(false)
+						if hideHead > hideDeputy then score = hideHead else score = hideDeputy end -- 自选暗置最大收益
+					end
+				else
+					score = -2
+				end
+				-- 这一点收益对当前角色来说是什么收益
+				if not self.player:isFriend(p) then
+					score = -score
+				end
+
+				jinxianScore = jinxianScore + score
+			end
+		end
+		if self.player:hasShownOneGeneral() then
+			if jinxianScore >= 0 then
+				if self.player:inHeadSkills("jinxian") then
+					if canShowHead then
+						return "show_head_general"
+					end
+				else
+					if canShowDeputy then
+						return "show_deputy_general"
+					end
+				end
+			end
+		else
+			if jinxianScore > 4 then
+				if canShowHead and canShowDeputy then
+					return "show_both_generals"
+				end
+			end
 		end
 	end
 
