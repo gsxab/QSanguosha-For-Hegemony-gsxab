@@ -4175,8 +4175,15 @@ function SmartAI:isWeak(player)
 	player = player or self.player
 	if HasBuquEffect(player) then return false end
 	if HasNiepanEffect(player) then return false end
-	if player:hasShownSkill("kongcheng") and player:isKongcheng() and player:getHp() >= 2 then return false end
-	if (player:getHp() <= 2 and player:getHandcardNum() <= 2) or player:getHp() <= 1 then return true end
+	local hp = player:getHp()
+	if self.player:getMark("CompanionEffect") > 1 then
+		hp = hp + 1
+	end
+	if self.player:getMark("careerist") > 1 then
+		hp = hp + 1
+	end
+	if player:hasShownSkill("kongcheng") and player:isKongcheng() and hp >= 2 then return false end
+	if (hp <= 2 and player:getHandcardNum() <= 2) or hp <= 1 then return true end
 	return false
 end
 
