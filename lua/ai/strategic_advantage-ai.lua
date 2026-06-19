@@ -1268,6 +1268,13 @@ sgs.ai_skill_choice.imperial_order = function(self, choices, data)
 	end
 
 	if self.player:getKingdom() == "shu" and table.contains(choices,"show_head") and table.contains(choices,"show_deputy") then
+		if self.player:hasSkill("jinxian") then -- 近陷不能用于单亮响应，以免少个将。君主和野心家前面判断了除外
+			if self.player:inHeadSkills("jinxian") then
+				return "show_deputy"
+			else
+				return "show_head"
+			end
+		end
 		local wuhu_show_head, wuhu_show_deputy = false,false
 		local xuanhuo_priority = {"paoxiao", "tieqi", "kuanggu", "liegong", "wusheng", "longdan"}
 		for _, skill in ipairs(xuanhuo_priority) do--有顺序优先度
@@ -1287,7 +1294,6 @@ sgs.ai_skill_choice.imperial_order = function(self, choices, data)
 		if wuhu_show_head then
 		  return "show_head"
 		end
-		return "show_head"
 	end
 
 	if self.player:getPhase() ~= sgs.Player_NotActive then return math.random(2) > 1 and "show_head" or "show_deputy" end

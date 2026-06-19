@@ -163,7 +163,7 @@ MainWindow::MainWindow(QWidget *parent)
 #ifdef Q_OS_ANDROID
     setFixedSize(qApp->desktop()->width(), qApp->desktop()->height());
 #endif
-    fetchUpdateInformation();
+    // fetchUpdateInformation();
 
     connection_dialog = new ConnectionDialog(this);
     connect(ui->actionStart_Game, &QAction::triggered, connection_dialog, &ConnectionDialog::exec);

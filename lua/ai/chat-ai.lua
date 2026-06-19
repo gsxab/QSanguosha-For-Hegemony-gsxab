@@ -18,7 +18,7 @@
   Mogara
 *********************************************************************]]
 
-sgs.ai_chat = {}
+sgs.ai_chat = {} -- 牌的类名和牌的类名_female由很下面的 SmartAI::speak 触发 ，其他的由下面这个 speak 触发
 
 function speak(to, type)
 	if not sgs.GetConfig("AIChat", false) then return end
@@ -52,8 +52,12 @@ function speakTrigger(card, from, to, event)
 		speak(from, "leiji_jink")
 	elseif card:isKindOf("QuhuCard") then
 		speak(from, "quhu")
-	elseif card:isKindOf("Slash") and to:hasShownSkill("yiji") and (to:getHp() <= 1) then
-		speak(to, "guojia_weak")
+	elseif card:isKindOf("Slash") and to:hasShownSkill("yiji") then
+		if to:getHp() <= 1 or card:hasFlag("drank") then
+			speak(to, "guojia_weak")
+		else
+			speak(to, "yiji")
+		end
 	elseif card:isKindOf("SavageAssault") and (to:hasShownSkill("kongcheng") or to:hasShownSkill("huoji")) then
 		speak(to, "daxiang")
 	elseif card:isKindOf("FireAttack") and to:hasShownSkill("luanji") then
